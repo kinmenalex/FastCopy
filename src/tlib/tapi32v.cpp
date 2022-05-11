@@ -127,6 +127,9 @@ void *DOTDOT_V;			// ".."
 void *QUOTE_V;			// "\""
 void *TRUE_V;			// "true"
 void *FALSE_V;			// "false"
+#if 4032
+void *ARCHIVE_V;		// " - Archive\\"
+#endif
 int CHAR_LEN_V;			// 2(WCHAR) or 1(char)
 int MAX_PATHLEN_V;		// MAX_WCHAR or 
 BOOL IS_WINNT_V;		// MAX_WCHAR or 
@@ -287,6 +290,9 @@ BOOL TLibInit_Win32V()
 		QUOTE_V = L"\"";
 		TRUE_V = L"true";
 		FALSE_V = L"false";
+#if 4032
+	    ARCHIVE_V =  L" - Archive\\";
+#endif
 	}
 	else {
 		// Win32API(ANSI)
@@ -422,6 +428,9 @@ BOOL TLibInit_Win32V()
 		QUOTE_V = "\"";
 		TRUE_V = "true";
 		FALSE_V = "false";
+#if 4032
+	    ARCHIVE_V =  " - Archive\\";
+#endif
 	}
 	return	TRUE;
 }

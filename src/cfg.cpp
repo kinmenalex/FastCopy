@@ -75,6 +75,9 @@
 #define MAXLINKHASH_KEY			"max_linkhash"
 #define ALLOWCONTFSIZE_KEY		"allow_cont_fsize"
 #define RECREATE_KEY			"recreate"
+#if 4032
+#define SYNC_DEL_TO_ARCHIVE_KEY			"syncdeltoarchive"
+#endif
 #define EXTENDFILTER_KEY		"extend_filter"
 #define WINPOS_KEY				"win_pos"
 #define TASKBARMODE_KEY			"taskbarMode"
@@ -360,6 +363,9 @@ BOOL Cfg::ReadIni(void *user_dir, void *virtual_dir)
 	maxLinkHash		= ini.GetInt(MAXLINKHASH_KEY, DEFAULT_LINKHASH);
 	allowContFsize	= ini.GetInt(ALLOWCONTFSIZE_KEY, DEFAULT_ALLOWCONTFSIZE);
 	isReCreate		= ini.GetInt(RECREATE_KEY, FALSE);
+#if 4032
+	isSyncDelToArchive = ini.GetInt(SYNC_DEL_TO_ARCHIVE_KEY, FALSE);
+#endif
 	isExtendFilter	= ini.GetInt(EXTENDFILTER_KEY, FALSE);
 	taskbarMode		= ini.GetInt(TASKBARMODE_KEY, 0);
 	infoSpan		= ini.GetInt(INFOSPAN_KEY, DEFAULT_INFOSPAN);

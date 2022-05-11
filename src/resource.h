@@ -142,6 +142,9 @@
 #define IDS_NOTEPAD                     1146
 #define IDS_LINKDEST_OPT                1147
 #define IDS_RECREATE_OPT                1148
+#if 4032
+#define IDS_SYNC_DEL_TO_ARCHIVE_OPT		1165
+#endif
 #define IDS_FROMDATE_OPT                1149
 #define IDS_TODATE_OPT                  1150
 #define IDS_MINSIZE_OPT                 1151

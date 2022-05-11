@@ -1147,6 +1147,9 @@ BOOL FastCopy::ReadProc(int dir_len, BOOL confirm_dir)
 					ret = DeleteFileProc(confirmDst, confirm_len, dstStat->cFileName, dstStat);
 			}
 			else {
+#if 4032
+				DebugW(L"Delete req %s\n",dstStat->cFileName);
+#endif
 				SendRequest(DELETE_FILES, 0, dstStat);
 			}
 			if (isAbort)
@@ -2350,6 +2353,86 @@ BOOL FastCopy::DeleteDirProc(void *path, int dir_len, void *fname, FileStat *sta
 	return	ret;
 }
 
+#if 4032
+BOOL IsFileExists(void * path)
+{
+	HANDLE	fh;
+
+	if ((fh = CreateFileV(path, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, 0,
+				OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS , 0)) == INVALID_HANDLE_VALUE) {
+		return	FALSE;
+	}
+
+	::CloseHandle(fh);
+	return TRUE;
+}
+
+BOOL CreateParentDirectory(void *path, int dirBaseLen)
+{
+	WCHAR *	dir = new WCHAR [MAX_PATH_EX];
+	int i, len;
+	
+	strcpyV( dir, path);
+	len = strlenV(dir);
+
+    len --;
+	for( i= dirBaseLen-1; i< len ; i++) {
+		if( GetChar(dir,i) == '\\' ) {
+			SetChar(dir,i,'\0');
+			// Debug("Create dir %s\n",dir);
+			if( !CreateDirectoryV(dir,NULL) ) {
+				int err = ::GetLastError();
+				if( err != ERROR_ALREADY_EXISTS ) { 
+					DebugW(L"err = %x\n", err);
+				}
+			}
+			SetChar(dir,i,'\\');
+		}
+	}
+
+	delete dir;
+	return TRUE;
+}
+
+
+BOOL FastCopy::MoveFileToArchive(void *path)
+{
+    if( IsFileExists(path) ) {
+		WCHAR *	archivePath = new WCHAR [MAX_PATH_EX];
+		int archive_len = strlenV(ARCHIVE_V);
+
+		//DebugW(L"MoveFileToArchive path=%s\n",path);
+
+		memcpy(archivePath, path, dstBaseLen * CHAR_LEN_V);
+	    strcpyV(MakeAddr(archivePath, dstBaseLen -1 ),ARCHIVE_V);
+		strcpyV(MakeAddr(archivePath, dstBaseLen -1 + archive_len ),MakeAddr(path, dstBaseLen));
+		DebugW(L"archive path=%s\n",archivePath);
+
+		// delete old archive file
+		if (DeleteFileV(archivePath) == FALSE) {
+			int err = ::GetLastError();
+			if( err == ERROR_PATH_NOT_FOUND ) {
+				CreateParentDirectory(archivePath, dstBaseLen -1 + archive_len);
+			}
+			else if(err != ERROR_FILE_NOT_FOUND) { 
+				DebugW(L"del err = %x\n", err);
+			}
+		}
+
+		if(MoveFileV(path,archivePath) == FALSE) {
+			int err = ::GetLastError();
+			if( err != ERROR_FILE_NOT_FOUND ) { 
+				DebugW(L"move err = %x\n", err);
+			}
+		}
+
+		delete archivePath;
+    }
+	return TRUE;
+}
+
+#endif /* 4032 */
+
 BOOL FastCopy::DeleteFileProc(void *path, int dir_len, void *fname, FileStat *stat)
 {
 	int		len = sprintfV(MakeAddr(path, dir_len), FMT_STR_V, fname);
@@ -2359,6 +2442,14 @@ BOOL FastCopy::DeleteFileProc(void *path, int dir_len, void *fname, FileStat *st
 		if (stat->dwFileAttributes & FILE_ATTRIBUTE_READONLY) {
 			SetFileAttributesV(path, FILE_ATTRIBUTE_NORMAL);
 		}
+#if 4032
+		if( info.mode == SYNCCP_MODE && (info.flags & SYNC_DEL_TO_ARCHIVE)) {
+			DebugW(L"DeleteFileProc %s\n",(char*)path);
+			MoveFileToArchive(path);
+		}
+		else 
+		{
+#endif
 		void	*target = path;
 
 		if (info.mode == DELETE_MODE && (info.flags & (OVERWRITE_DELETE|OVERWRITE_DELETE_NSA))
@@ -2379,6 +2470,9 @@ BOOL FastCopy::DeleteFileProc(void *path, int dir_len, void *fname, FileStat *st
 			total.errFiles++;
 			return	ConfirmErr("DeleteFile", MakeAddr(target, dstPrefixLen)), FALSE;
 		}
+#if 4032
+		}
+#endif
 	}
 	if (isListing) PutList(MakeAddr(path, dstPrefixLen), PL_DELETE|(is_reparse ? PL_REPARSE : 0));
 
@@ -3301,6 +3395,12 @@ BOOL FastCopy::WriteFileProc(int dst_len)
 
 	if (waitTick) Wait((waitTick + 9) / 10);
 
+#if 4032
+	if( info.mode == SYNCCP_MODE && (info.flags & SYNC_DEL_TO_ARCHIVE)) {
+		DebugW(L"src = %s,%d \ndst = %s,%d \n",(char*)src,srcBaseLen,(char*)dst,dstBaseLen);
+		MoveFileToArchive(dst);
+	}
+#endif
 	if (is_require_del) {
 		if (!DeleteFileV(dst) && ::GetLastError() != ERROR_FILE_NOT_FOUND) {
 			SetFileAttributesV(dst, FILE_ATTRIBUTE_NORMAL);

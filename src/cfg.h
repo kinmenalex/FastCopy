@@ -167,6 +167,9 @@ public:
 	int		maxLinkHash;
 	_int64	allowContFsize;
 	BOOL	isReCreate;
+#if 4032
+	BOOL	isSyncDelToArchive;
+#endif
 	BOOL	isExtendFilter;
 	int		taskbarMode; // 0: use tray, 1: use taskbar
 	int		infoSpan;	// information update timing (0:250msec, 1:500msec, 2:1000sec)

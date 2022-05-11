@@ -145,6 +145,9 @@ extern void *DOTDOT_V;			// ".."
 extern void *QUOTE_V;			// "\""
 extern void *TRUE_V;			// "true"
 extern void *FALSE_V;			// "false"
+#if 4032
+extern void *ARCHIVE_V;		// " - Archive\\"
+#endif
 extern int CHAR_LEN_V;			// 2(WCHAR) or 1(char)
 extern int MAX_PATHLEN_V;
 extern BOOL IS_WINNT_V;

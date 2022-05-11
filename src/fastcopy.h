@@ -242,6 +242,9 @@ public:
 				DISABLE_COMPARE_LIST=	0x00100000,
 				DEL_BEFORE_CREATE	=	0x00200000,
 				DELDIR_WITH_FILTER	=	0x00400000,
+#if 4032
+				SYNC_DEL_TO_ARCHIVE =   0x00800000,
+#endif
 				LISTING				=	0x01000000,
 				VERIFY_MD5			=	0x02000000,
 				OVERWRITE_PARANOIA	=	0x04000000,
@@ -539,6 +542,9 @@ protected:
 	BOOL DeleteProc(void *path, int dir_len);
 	BOOL DeleteDirProc(void *path, int dir_len, void *fname, FileStat *stat);
 	BOOL DeleteFileProc(void *path, int dir_len, void *fname, FileStat *stat);
+#if 4032
+	BOOL MoveFileToArchive(void *path);
+#endif
 
 	void SetupRandomDataBuf(void);
 	void GenRandomName(void *path, int fname_len, int ext_len);

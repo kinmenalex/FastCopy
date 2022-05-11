@@ -113,6 +113,9 @@ TMainDlg::TMainDlg() : TDlg(MAIN_DIALOG), aboutDlg(this), setupDlg(&cfg, this),
 	isReparse = cfg.isReparse;
 	isLinkDest = cfg.isLinkDest;
 	isReCreate = cfg.isReCreate;
+#if 4032
+	isSyncDelToArchive = cfg.isSyncDelToArchive;
+#endif
 	isExtendFilter = cfg.isExtendFilter;
 	maxLinkHash = cfg.maxLinkHash;
 	forceStart = cfg.forceStart;
@@ -1351,6 +1354,9 @@ BOOL TMainDlg::ExecCopy(DWORD exec_flags)
 			FastCopy::SERIAL_VERIFY_MOVE : 0)
 		| (isLinkDest ? FastCopy::RESTORE_HARDLINK : 0)
 		| (isReCreate ? FastCopy::DEL_BEFORE_CREATE : 0)
+#if 4032
+		| (isSyncDelToArchive ? FastCopy::SYNC_DEL_TO_ARCHIVE : 0 )	
+#endif
 		| (diskMode == 0 ? 0 : diskMode == 1 ? FastCopy::FIX_SAMEDISK : FastCopy::FIX_DIFFDISK);
 	info.bufSize		= GetDlgItemInt(BUFSIZE_EDIT) * 1024 * 1024;
 	info.maxTransSize	= cfg.maxTransSize * 1024 * 1024;
@@ -2242,6 +2248,9 @@ BOOL TMainDlg::CommandLineExecV(int argc, void **argv)
 	void	*STREAM_STR			= GetLoadStrV(IDS_STREAM_OPT);
 	void	*LINKDEST_STR		= GetLoadStrV(IDS_LINKDEST_OPT);
 	void	*RECREATE_STR		= GetLoadStrV(IDS_RECREATE_OPT);
+#if 4032
+	void	*SYNC_DEL_TO_ARCHIVE_STR		= GetLoadStrV(IDS_SYNC_DEL_TO_ARCHIVE_OPT);
+#endif
 	void	*SRCFILEW_STR		= GetLoadStrV(IDS_SRCFILEW_OPT);
 	void	*SRCFILE_STR		= GetLoadStrV(IDS_SRCFILE_OPT);
 	void	*FINACT_STR			= GetLoadStrV(IDS_FINACT_OPT);
@@ -2354,6 +2363,11 @@ BOOL TMainDlg::CommandLineExecV(int argc, void **argv)
 		else if (strcmpiEx(*argv, RECREATE_STR, &len) == 0) {
 			isReCreate = GetArgOpt(MakeAddr(*argv, len), TRUE);
 		}
+#if 4032
+		else if (strcmpiEx(*argv, SYNC_DEL_TO_ARCHIVE_STR, &len) == 0) {
+			isSyncDelToArchive = GetArgOpt(MakeAddr(*argv, len), TRUE);
+		}
+#endif
 		else if (strcmpiEx(*argv, SRCFILEW_STR, &len) == 0) {
 			if (!MakeFileToPathArray(MakeAddr(*argv, len), &pathArray, TRUE)) {
 				MessageBoxW(FmtW(L"Can't open: %s", MakeAddr(*argv, len)), FASTCOPYW);

@@ -629,6 +629,8 @@ void Debug(char *fmt,...)
 
 void DebugW(WCHAR *fmt,...)
 {
+#if 4032
+#ifdef _DEBUG
 	WCHAR buf[8192];
 
 	va_list	ap;
@@ -636,6 +638,8 @@ void DebugW(WCHAR *fmt,...)
 	_vsnwprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 	::OutputDebugStringW(buf);
+#endif
+#endif
 }
 
 void DebugU8(char *fmt,...)

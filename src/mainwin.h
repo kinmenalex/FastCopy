@@ -114,6 +114,9 @@ protected:
 	BOOL		isLinkDest;
 	int			maxLinkHash;
 	BOOL		isReCreate;
+#if 4032
+	BOOL		isSyncDelToArchive;
+#endif
 	BOOL		isExtendFilter;
 	BOOL		resultStatus;
 
